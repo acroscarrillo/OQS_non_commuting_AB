@@ -1,6 +1,6 @@
 using LinearAlgebra
 using LinearSolve
-
+using SparseArrays
 
 function A(L::Int, p::Real)
     temp = zeros(Float64,(L,L))
@@ -21,7 +21,8 @@ function M(h,A,B)
     Id = I(h_dim)
     left = Id - im*h - 0.5*transpose( A - B )
     right = Id + im*h - 0.5*( A - B )
-    return kron(left, Id) + kron(Id, right)
+    return kron(left, sparse(Id)) + kron(sparse(Id), right) #sparse
+    # return kron(left, Id) + kron(Id, right) #dense
 end
 
 function C_NESS(h,A,B)
@@ -42,7 +43,7 @@ function C_sub(C_tot,subsys)
 end
 
 function S(C)
-    lambs = eigvals(C) 
+    lambs = real(eigvals(C))
     entropy = 0
     for i=1:length(lambs)
         lamb = lambs[i]
@@ -52,4 +53,30 @@ function S(C)
     end
     return entropy
     # return real( sum( -(1 .- lambs).*log2.(1 .- lambs) .- lambs.*log2.(lambs) ) ) THIS DOESNT WORK WHEN AN EIGVAL IS 0 OR 1 HENCE THE LOOP
+end
+
+function MI_NESS(h,A,B,subsys_A,subsys_B=nothing)
+    C_tot = C_NESS(h,A,B)
+    L = size(h)[1]
+    L_A = length(subsys_A)
+    if subsys_B==nothing
+        subsys_B = zeros(L-L_A)
+        counter = 1
+        for i=1:L
+            aux = 0
+            for j=1:L_A
+                if i!=subsys_A[j]
+                    aux += 1
+                end
+            end
+            if aux == L_A
+                subsys_B[counter] = i
+                counter += 1
+            end
+        end
+        return S(C_sub(C_tot,subsys_A)) + S(C_sub(C_tot,Int.(subsys_B))) - S(C_tot)
+    else
+        tot_sub_sys = vcat(subsys_A,subsys_B)
+        return return S(C_sub(C_tot,subsys_A)) + S(C_sub(C_tot,subsys_B)) - S(C_sub(C_tot,tot_sub_sys))
+    end
 end
