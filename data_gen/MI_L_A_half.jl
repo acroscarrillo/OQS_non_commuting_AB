@@ -2,7 +2,7 @@ include("../src/src.jl")
 
 L_array = Vector(10:10:50)
 p_array = Vector(0:0.2:2)
-runs_array = Vector(100:-10:60)
+runs_array = [100,100,100,100,100]
 data_array = zeros( length(L_array)*length(p_array), 5 ) # MI, MI_err, L, p, L_A
 
 counter = 1
