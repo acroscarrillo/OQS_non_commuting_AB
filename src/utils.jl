@@ -1,3 +1,7 @@
+using DataFrames
+using CSV
+using Plots
+
 function rand_sym(N::Int)
     temp = randn(N,N)
     return temp*transpose(temp)

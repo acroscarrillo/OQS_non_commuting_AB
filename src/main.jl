@@ -1,6 +1,7 @@
 using LinearAlgebra
 using LinearSolve
 using SparseArrays
+using Statistics
 
 function A(L::Int, p::Real)
     temp = zeros(Float64,(L,L))
