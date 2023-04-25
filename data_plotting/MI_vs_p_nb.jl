@@ -1,6 +1,6 @@
 include("../src/src.jl")
 
-df = DataFrame(CSV.File("data/MI_vs_L.csv"))
+df = DataFrame(CSV.File("data/MI_at_L_A_half_wb.csv"))
 
 p_array = unique(df.p)
 L_array = unique(df.L)

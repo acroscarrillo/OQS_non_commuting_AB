@@ -2,6 +2,7 @@ using LinearAlgebra
 using LinearSolve
 using SparseArrays
 using Statistics
+using Metal
 
 function A(L::Int, p::Real)
     temp = zeros(Float64,(L,L))
@@ -26,10 +27,16 @@ function M(h,A,B)
     # return kron(left, Id) + kron(Id, right) #dense
 end
 
-function C_NESS(h,A,B)
-    prob = LinearProblem( M(h,A,B) , ComplexF64.(vec(A)))
-    sol = solve(prob)
-    return reshape(sol.u, size(h))
+function C_NESS(h,A,B,gpu=false)
+    if !gpu
+        prob = LinearProblem( M(h,A,B) , ComplexF64.(vec(A)))
+        sol = solve(prob)
+        return reshape(sol.u, size(h))
+    else
+        A_f = lu(MtlArray(Float32.(M(h,A,B))))
+        sol = Matrix(A_f.U) \ ( Matrix(A_f.L) \ vec(A) )
+        return reshape(sol, size(h))
+    end
 end
 
 function C_sub(C_tot,subsys)

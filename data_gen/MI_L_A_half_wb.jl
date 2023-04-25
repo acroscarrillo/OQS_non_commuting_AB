@@ -1,19 +1,20 @@
 include("../src/src.jl")
 
 L_array = Vector(10:10:50)
-p_array = Vector(0:0.2:2)
-runs_array = [100,100,100,100,100]
+p_array = Vector(0:0.1:2)
+runs_array = [100,100,100,50,50]
 data_array = zeros( length(L_array)*length(p_array), 5 ) # MI, MI_err, L, p, L_A
 
 counter = 1
 for (j,p) in enumerate(p_array)
-    display( j / length(p_array))
+    display( (j-1) / length(p_array))
     for (i, L) in enumerate(L_array)
-        L_A = L÷2
+        L_A = L÷3
         subsys_A = Vector(1:L_A)
+        subsys_B = Vector(2*L_A:L)
         temp = zeros(runs_array[i])
         for j=1:runs_array[i]
-            temp[j] = MI_NESS(zeros(L,L),A(L,p),A(L,p),subsys_A)
+            temp[j] = MI_NESS(zeros(L,L),A(L,p),A(L,p),subsys_A,subsys_B)
         end
         data_array[counter,:] .= mean(temp), std(temp)/sqrt(L), L, p, L_A
         counter += 1
@@ -21,4 +22,4 @@ for (j,p) in enumerate(p_array)
 end
 
 df = DataFrame(data_array, ["MI","MI_err","L","p","L_A"])
-CSV.write("data/MI_vs_L.csv", df)
+CSV.write("data/MI_at_L_A_half_wb.csv", df)
