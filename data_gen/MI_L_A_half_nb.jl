@@ -20,5 +20,5 @@ for (j,p) in enumerate(p_array)
     end
 end
 
-df = DataFrame(data_array, ["MI","MI_err","L","p","L_A"])
-CSV.write("data/MI_at_L_A_half_nb.csv", df)
+df_nb = DataFrame(data_array, ["MI","MI_err","L","p","L_A"])
+CSV.write("data/MI_at_L_A_half_nb.csv", df_nb)

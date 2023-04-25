@@ -1,6 +1,6 @@
 include("../src/src.jl")
 
-df = DataFrame(CSV.File("data/MI_at_L_A_half_wb.csv"))
+df = DataFrame(CSV.File("data/MI_at_L_A_half_nb.csv"))
 
 p_array = unique(df.p)
 L_array = unique(df.L)
@@ -14,5 +14,5 @@ end
 plot(transpose(float.(p)), transpose(float.(MI)), yerr = transpose(float.(MI_err)),
         labels="L = ".*string.(transpose(L_array)), xlabel="p", ylabel="MI",dpi=300)
 
-savefig("figs/MI_vs_p.pdf")
-savefig("figs/MI_vs_p.png")
+savefig("figs/MI_vs_p_nb.pdf")
+savefig("figs/MI_vs_p_nb.png")
