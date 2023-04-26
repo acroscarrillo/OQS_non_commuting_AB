@@ -14,5 +14,5 @@ end
 plot(transpose(float.(p)), transpose(float.(MI)), yerr = transpose(float.(MI_err)),
         labels="L = ".*string.(transpose(L_array)), xlabel="p", ylabel="MI",dpi=300)
 
-savefig("figs/MI_vs_p_nb.pdf")
-savefig("figs/MI_vs_p_nb.png")
+savefig("figs/MI_vs_p/MI_vs_p_nb.pdf")
+savefig("figs/MI_vs_p/MI_vs_p_nb.png")

@@ -12,7 +12,7 @@ for val in L_array
 end
 
 plot(transpose(float.(p)), transpose(float.(MI)), yerr = transpose(float.(MI_err)),
-        labels="L = ".*string.(transpose/Users/alex/Documents/GitHub/OQS_non_commuting_AB/figs/MI_vs_p.png(L_array)), xlabel="p", ylabel="MI",dpi=300)
+        labels="L = ".*string.(transpose(L_array)), xlabel="p", ylabel="MI",dpi=300)
 
-savefig("figs/MI_vs_p.pdf")
-savefig("figs/MI_vs_p.png")
+savefig("figs/MI_vs_p/MI_vs_p_wb.pdf")
+savefig("figs/MI_vs_p/MI_vs_p_wb.png")

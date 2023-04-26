@@ -2,7 +2,7 @@ include("../src/src.jl")
 
 L_array = Vector(10:10:50)
 p_array = Vector(0:0.1:2)
-runs_array = [100,100,100,50,50]
+runs_array = [2000,1000,1000,200,200]
 data_array = zeros( length(L_array)*length(p_array), 5 ) # MI, MI_err, L, p, L_A
 
 counter = 1
@@ -22,4 +22,4 @@ for (j,p) in enumerate(p_array)
 end
 
 df_wb = DataFrame(data_array, ["MI","MI_err","L","p","L_A"])
-CSV.write("data/MI_at_L_A_half_wb.csv", df)_wb
+CSV.write("data/MI_at_L_A_half_wb.csv", df_wb()
