@@ -88,3 +88,9 @@ function MI_NESS(h,A,B,subsys_A,subsys_B=nothing)
         return return S(C_sub(C_tot,subsys_A)) + S(C_sub(C_tot,subsys_B)) - S(C_sub(C_tot,tot_sub_sys))
     end
 end
+
+function temp_bulk(C)
+    L = size(C)[1]
+    xi = real(C[L÷2,L÷2]) #it is a real number already as C is hermitian. This makes temp a Float instead of ComplexFloat
+    return log(1/xi-1)
+end
