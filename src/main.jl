@@ -3,6 +3,7 @@ using LinearSolve
 using SparseArrays
 using Statistics
 using Metal
+using ProgressBars
 
 function A(L::Int, p::Real)
     temp = zeros(Float64,(L,L))

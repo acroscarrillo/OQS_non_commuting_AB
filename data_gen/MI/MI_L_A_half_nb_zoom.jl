@@ -15,10 +15,10 @@ for (j,p) in enumerate(p_array)
         for j=1:runs_array[i]
             temp[j] = MI_NESS(zeros(L,L),A(L,p),A(L,p),subsys_A)
         end
-        data_array[counter,:] .= mean(temp), std(temp)/sqrt(L), L, p, L_A
+        data_array[counter,:] .= mean(temp), std(temp)/sqrt(runs_array[i]), L, p, L_A
         counter += 1
     end
 end
 
 df_nb = DataFrame(data_array, ["MI","MI_err","L","p","L_A"])
-CSV.write("data/MI_at_L_A_half_nb.csv", df_nb)
+CSV.write("data/MI_at_L_A_half_nb_zoom.csv", df_nb)
