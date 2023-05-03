@@ -1,4 +1,4 @@
-include("../src/src.jl")
+include("../../src/src.jl")
 
 L_array = Vector(10:10:50)
 p_array = Vector(0:0.1:2)
