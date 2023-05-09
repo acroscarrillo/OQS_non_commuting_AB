@@ -1,4 +1,5 @@
 using LsqFit
+using Optim
 
 model(x, p) = p[1]*exp.(-x*p[2])
 xdata = range(0, stop=5, length=300)

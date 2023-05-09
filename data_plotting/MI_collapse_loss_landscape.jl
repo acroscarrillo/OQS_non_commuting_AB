@@ -1,28 +1,35 @@
 include("../src/src.jl")
-using LsqFit
 
-model(x, p) = p[1]*exp.(-x*p[2])
-xdata = range(0, stop=10, length=20)
-ydata = model(xdata, [1.0 2.0]) + 0.01*randn(length(xdata))
-p0 = [0.5, 0.5]
-fit = curve_fit(model, xdata, ydata, p0,lower=[0.0,0.0])
-fit.param
+df_in = DataFrame(CSV.File("data/MI_at_L_A_half_wb_zoom.csv")) #format MI|MI_err|L|p|L_A
 
-df = DataFrame(CSV.File("data/MI_at_L_A_half_wb_zoom.csv")) #format MI|MI_err|L|p|L_A
+temp_F(params) = fss_cost(params, df_in; g_noise=false)
 
-##############################
-# call fitter, generate data #
-##############################
+# p_c_array = Vector(range(1, stop=1.2, length=100))
+# nu_array  = Vector(range(1, stop=5, length=100))
+
+p_c_array = Vector(range(0, stop=2, length=1000))
+nu_array  = Vector(range(0.5, stop=5, length=1000))
+
+loss = zeros((length(p_c_array),length(nu_array)))
+for (j,p_c) i1n ProgressBar(enumerate(p_c_array))
+    for (k,nu) in enumerate(nu_array)
+        loss[j,k] = log(temp_F((p_c,nu)))
+    end
+end
+
+heatmap(loss)
+
 # res = minimize(O_w_b_alt, np.array([1,1,1]), method='Powell',options={'disp': True, "maxiter": 1000}, bounds=((0,2),(0,1),(0,2)),tol=1e-20)
 
 # # p_c, nu, zeta = 0.97,5.2,0# res.x
 # p_c, nu, zeta = res.x
 
 # print(p_c,nu,zeta)
-
+df = DataFrame()
+df.y, df.x, df.d, df.L = df_in.L.^
 data_in=np.load("data/MI_vs_p_with_boundaries_1to13range.npy") #format MI|MI_err|L|p
 data  = np.zeros((len(data_in),4), dtype=np.float64)
-for i in range(len(data_in)):
+for i in range(len(data_in))
     data[i,0] = (data_in[i,2]**(zeta/nu))*data_in[i,0]                 # y_i
     data[i,1] = ( data_in[i,3] - p_c )*(data_in[i,2]**(1/nu))          # x_i
     data[i,2] = data_in[i,1]                                           # d_i

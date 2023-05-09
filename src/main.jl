@@ -4,6 +4,9 @@ using SparseArrays
 using Statistics
 using Metal
 using ProgressBars
+using DataFrames
+using CSV
+using Plots
 
 function A(L::Int, p::Real)
     temp = zeros(Float64,(L,L))
@@ -94,4 +97,47 @@ function temp_bulk(C)
     L = size(C)[1]
     xi = real(C[L÷2,L÷2]) #it is a real number already as C is hermitian. This makes temp a Float instead of ComplexFloat
     return log(1/xi-1)
+end
+
+function fss_cost(params, df_in::DataFrame; g_noise=false)
+    p_c, nu = params[1], params[2]
+
+    df = DataFrame()
+    if g_noise # add gaussian noise accordingly
+        df.y = (df_in.MI .+ sqrt.(df_in.MI_err).*randn(size(df_in.MI))) .* (df_in.L.^(1/nu))    
+        df.x = (df_in.p .- p_c) .* (df_in.L.^(1/nu))
+        df.d = df_in.MI_err.*sqrt.(df_in.L)
+    else # no noise
+        df.y = df_in.MI.*(df_in.L.^(1/nu))    
+        df.x = (df_in.p .- p_c) .* (df_in.L.^(1/nu))
+        df.d = df_in.MI_err.*sqrt.(df_in.L)
+    end
+    sort!(df,:x)  # sort in ascending x_i
+
+    O_val = 0
+    for i=2:nrow(df)-1 # as each loop requires n.n.
+        y_m, y, y_p = df.y[i-1], df.y[i], df.y[i+1]
+        x_m, x, x_p = df.x[i-1], df.x[i], df.x[i+1]
+        d_m, d, d_p = df.d[i-1], df.d[i], df.d[i+1]
+        
+        ###################
+        #CAREFUL WITH THIS#   this just handles the p=p_c situation which although 
+        # mathematically defined, it is numerically unstable so we put it by hand
+        ###################
+        temp = x_p-x_m
+        if temp==0
+            frac_p, frac_m = 1/2, 1/2
+        else
+            frac_p = (x_p-x)/temp
+            frac_m = (x-x_m)/(x_p-x_m)
+        end 
+        ####################
+        
+        y_bar = y_m*frac_p + y_p*frac_m
+        Delta_sqrd = d^2 + (d_m*frac_p)^2 + (d_p*frac_m)^2
+                
+        O_val += (y-y_bar)^2#/Delta_sqrd
+    end
+
+    return O_val 
 end
