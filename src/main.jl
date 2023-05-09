@@ -6,7 +6,7 @@ using DataFrames
 
 ⨷(a,b) = kron(a,b)   
 
-function power_law_decay_matrix(L, p)
+function pwr_law_mat(L, p)
     temp = zeros(Float64, (L, L))
     for col in 1:L
         for row in 1:L
@@ -31,11 +31,11 @@ function master_op(h, A, B)
     # return kron(left, Id) + kron(Id, right) #dense
 end
 function master_op(A, B)
-    h_dim, A_dim, B_dim = size(h)[1], size(A)[1], size(B)[1]
-    if !(h_dim == A_dim == B_dim)
-        throw(ArgumentError("Dimensions of h, A and B mismatch"))
+    A_dim, B_dim = size(A)[1], size(B)[1]
+    if !(A_dim == B_dim)
+        throw(ArgumentError("Dimensions of A and B mismatch"))
     end
-    Id = I(h_dim)
+    Id = I(A_dim)
     left = Id - 0.5 * transpose(A - B)
     right = Id - 0.5 * (A - B)
     return left ⨷ sparse(Id) + sparse(Id) ⨷ right #sparse
@@ -45,46 +45,27 @@ end
 
 
 function correlation_steady_state(h, A, B)
-    if !gpu
-        prob = LinearProblem(master_op(h, A, B), ComplexF64.(vec(A)))
-        sol = solve(prob)
-        return reshape(sol.u, size(h))
+    prob = LinearProblem(master_op(h, A, B), ComplexF64.(vec(A)))
+    sol = solve(prob)
+    return reshape(sol.u, size(A)) 
 end
-function correlation_steady_state(A, B; gpu=false)
+function correlation_steady_state(A, B, gpu::Bool=false)
     if !gpu
         prob = LinearProblem(master_op(A, B), ComplexF64.(vec(A)))
         sol = solve(prob)
-        return reshape(sol.u, size(h))
+        return reshape(sol.u, size(A))
     else
         A_f = lu(MtlArray(Float32.(master_op(A, B))))
         sol = Matrix(A_f.U) \ (Matrix(A_f.L) \ vec(A))
-        return reshape(sol, size(h))
+        return reshape(sol, size(A))
     end
 end
 function correlation_steady_state(A, B) #if gpu not specified, use based on L
     L = size(A)[1]
     if L<40
-        prob = LinearProblem(master_op(A, B), ComplexF64.(vec(A)))
-        sol = solve(prob)
-        return reshape(sol.u, size(h))
+        return correlation_steady_state(A, B, false)
     else
-        A_f = lu(MtlArray(Float32.(master_op(A, B))))
-        sol = Matrix(A_f.U) \ (Matrix(A_f.L) \ vec(A))
-        return reshape(sol, size(h))
-    end
-end
-
-
-
-function correlation_steady_state(h, A, B; gpu=false)
-    if !gpu
-        prob = LinearProblem(master_op(h, A, B), ComplexF64.(vec(A)))
-        sol = solve(prob)
-        return reshape(sol.u, size(h))
-    else
-        A_f = lu(MtlArray(Float32.(master_op(h, A, B))))
-        sol = Matrix(A_f.U) \ (Matrix(A_f.L) \ vec(A))
-        return reshape(sol, size(h))
+        return correlation_steady_state(A, B, true)
     end
 end
 
@@ -103,7 +84,7 @@ end
 
 
 
-function von_neumann_entropy(C)
+function vn_entropy(C)
     lambs = real(eigvals(C))
     entropy = 0
     for i in 1:length(lambs)
@@ -118,16 +99,14 @@ end
 
 
 
-#write this as mutual_info(C,subsys_A,subsys_B) ..etc
-function MI_NESS(h, A, B, subsys_A, subsys_B)
-    full_correlation = correlation_steady_state(h, A, B)
+function MI_NESS(C, subsys_A, subsys_B)
     tot_sub_sys = vcat(subsys_A, subsys_B)
-    return von_neumann_entropy(sub_correlation(full_correlation, subsys_A)) +
-           von_neumann_entropy(sub_correlation(full_correlation, subsys_B)) -
-           von_neumann_entropy(sub_correlation(full_correlation, tot_sub_sys))
+    return vn_entropy(sub_correlation(C, subsys_A)) +
+           vn_entropy(sub_correlation(C, subsys_B)) -
+           vn_entropy(sub_correlation(C, tot_sub_sys))
 end
-function MI_NESS(h, A, B, subsys_A)
-    L = size(h)[1]
+function MI_NESS(C, subsys_A)
+    L = size(C)[1]
     L_A = length(subsys_A)   
     subsys_B = zeros(L - L_A)
     counter = 1
@@ -143,7 +122,7 @@ function MI_NESS(h, A, B, subsys_A)
             counter += 1
         end
     end
-    return MI_NESS(h, A, B, subsys_A, subsys_B)
+    return MI_NESS(C, subsys_A, Int.(subsys_B))
 end
 
 

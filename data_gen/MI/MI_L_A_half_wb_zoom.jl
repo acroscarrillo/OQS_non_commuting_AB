@@ -1,8 +1,11 @@
 include("../../src/src.jl")
 
-L_array = Vector(10:10:50)
+using ProgressBars
+using Statistics
+
+L_array = Vector(10:10:80)
 p_array = Vector(0.5:0.025:1)
-runs_array = [2500,2000,1500,300,250]
+runs_array = Vector(2000:-250:250)
 data_array = zeros( length(L_array)*length(p_array), 5 ) # MI, MI_err, L, p, L_A
 
 counter = 1
@@ -13,7 +16,10 @@ for (j,p) in ProgressBar(enumerate(p_array))
         subsys_B = Vector(2*L_A:L)
         temp = zeros(runs_array[i])
         for j=1:runs_array[i]
-            temp[j] = MI_NESS(zeros(L,L),A(L,p),A(L,p),subsys_A,subsys_B)
+            A = pwr_law_mat(L,p)
+            B = pwr_law_mat(L,p)
+            C = correlation_steady_state(A, B)
+            temp[j] = MI_NESS(C,subsys_A,subsys_B)
         end
         data_array[counter,:] .= mean(temp), std(temp)/sqrt(runs_array[i]), L, p, L_A
         counter += 1
