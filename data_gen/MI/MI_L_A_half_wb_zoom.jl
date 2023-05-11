@@ -3,13 +3,13 @@ include("../../src/src.jl")
 using ProgressBars
 using Statistics
 
-L_array = Vector(10:10:80)
+L_array = Vector(10:10:100)
 p_array = Vector(0.5:0.025:1)
-runs_array = Vector(2000:-250:250)
+runs_array = Vector(2500:-250:250)
 data_array = zeros( length(L_array)*length(p_array), 5 ) # MI, MI_err, L, p, L_A
 
 counter = 1
-for (j,p) in ProgressBar(enumerate(p_array))
+for (_,p) in ProgressBar(enumerate(p_array))
     for (i, L) in enumerate(L_array)
         L_A = L÷3
         subsys_A = Vector(1:L_A)
