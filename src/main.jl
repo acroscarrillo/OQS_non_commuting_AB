@@ -4,7 +4,7 @@ using SparseArrays
 using Metal
 using DataFrames
 
-⨷(a,b) = kron(a,b)   
+⨷(a, b) = kron(a, b)
 
 function pwr_law_mat(L, p)
     temp = zeros(Float64, (L, L))
@@ -15,6 +15,15 @@ function pwr_law_mat(L, p)
     end
     temp_sym = temp * transpose(temp)
     return temp_sym / max(eigvals(temp_sym)...)
+end
+
+
+
+function derivative_action(C, t, h, A, B)
+    return im * (transpose(h) * C - C * transpose(h)) - 0.5 * ((A + B) * C + C * (A + B)) + A
+end
+function derivative_action(C, t, A, B)
+    return - 0.5 * ((A + B) * C + C * (A + B)) + A
 end
 
 
@@ -42,12 +51,10 @@ function master_op(A, B)
     # return kron(left, Id) + kron(Id, right) #dense
 end
 
-
-
 function correlation_steady_state(h, A, B)
     prob = LinearProblem(master_op(h, A, B), ComplexF64.(vec(A)))
     sol = solve(prob)
-    return reshape(sol.u, size(A)) 
+    return reshape(sol.u, size(A))
 end
 function correlation_steady_state(A, B, gpu::Bool=false)
     if !gpu
@@ -62,14 +69,12 @@ function correlation_steady_state(A, B, gpu::Bool=false)
 end
 function correlation_steady_state(A, B) #if gpu not specified, use based on L
     L = size(A)[1]
-    if L<40
+    if L < 40
         return correlation_steady_state(A, B, false)
     else
         return correlation_steady_state(A, B, true)
     end
 end
-
-
 
 function sub_correlation(C_tot, subsys)
     L_sub = size(subsys)[1]
@@ -81,8 +86,6 @@ function sub_correlation(C_tot, subsys)
     end
     return C_sub
 end
-
-
 
 function vn_entropy(C)
     lambs = real(eigvals(C))
@@ -97,17 +100,15 @@ function vn_entropy(C)
     # return real( sum( -(1 .- lambs).*log2.(1 .- lambs) .- lambs.*log2.(lambs) ) ) THIS DOESNT WORK WHEN AN EIGVAL IS 0 OR 1 HENCE THE LOOP
 end
 
-
-
-function MI_NESS(C, subsys_A, subsys_B)
+function mutual_info(C, subsys_A, subsys_B)
     tot_sub_sys = vcat(subsys_A, subsys_B)
     return vn_entropy(sub_correlation(C, subsys_A)) +
            vn_entropy(sub_correlation(C, subsys_B)) -
            vn_entropy(sub_correlation(C, tot_sub_sys))
 end
-function MI_NESS(C, subsys_A)
+function mutual_info(C, subsys_A)
     L = size(C)[1]
-    L_A = length(subsys_A)   
+    L_A = length(subsys_A)
     subsys_B = zeros(L - L_A)
     counter = 1
     for i in 1:L
@@ -124,16 +125,17 @@ function MI_NESS(C, subsys_A)
     end
     return MI_NESS(C, subsys_A, Int.(subsys_B))
 end
-
-
+function mutual_info(C)
+    L = size(C)[1]
+    subsys_A = Vector(1:(L÷2))
+    return mutual_info(C, subsys_A)
+end
 
 function central_occ_bias(C)
     L = size(C)[1]
     xi = real(C[L ÷ 2, L ÷ 2]) #it is a real number already as C is hermitian. This makes temp a Float instead of ComplexFloat
     return log(1 / xi - 1)
 end
-
-
 
 function fss_cost(params, df_in::DataFrame; g_noise=false)
     p_c, nu = params[1], params[2]
