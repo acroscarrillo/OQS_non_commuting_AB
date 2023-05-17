@@ -6,15 +6,26 @@ using DataFrames
 
 ⨷(a, b) = kron(a, b)
 
-function pwr_law_mat(L, p)
-    temp = zeros(Float64, (L, L))
-    for col in 1:L
-        for row in 1:L
-            temp[row, col] = randn() / (abs(row - col) + 1)^p
+function pwr_law_mat(L, p,real=true)
+    if real
+        temp = zeros(Float64, (L, L))
+        for col in 1:L
+            for row in 1:L
+                temp[row, col] = randn() / (abs(row - col) + 1)^p
+            end
         end
+        temp_sym = temp * transpose(temp)
+        return temp_sym / max(eigvals(temp_sym)...)
+    else
+        temp = zeros(ComplexF64, (L, L))
+        for col in 1:L
+            for row in 1:L
+                temp[row, col] = (randn()+im*randn()) / (abs(row - col) + 1)^p
+            end
+        end
+        temp_sym = temp * transpose(temp)
+        return temp_sym / max(abs.(eigvals(temp_sym))...)
     end
-    temp_sym = temp * transpose(temp)
-    return temp_sym / max(eigvals(temp_sym)...)
 end
 
 
@@ -28,16 +39,19 @@ end
 
 
 
-function master_op(h, A, B)
+function master_op(h, A, B, sparse=true)
     h_dim, A_dim, B_dim = size(h)[1], size(A)[1], size(B)[1]
     if !(h_dim == A_dim == B_dim)
         throw(ArgumentError("Dimensions of h, A and B mismatch"))
     end
     Id = I(h_dim)
-    left = Id - im * h - 0.5 * transpose(A - B)
-    right = Id + im * h - 0.5 * (A - B)
-    return left ⨷ sparse(Id) + sparse(Id) ⨷ right #sparse
-    # return kron(left, Id) + kron(Id, right) #dense
+    left = - im * h - 0.5 * (A + B)'
+    right = im * h - 0.5 * (A + B)
+    if sparse
+        return left ⨷ sparse(Id) + sparse(Id) ⨷ right #sparse
+    else
+        return left ⨷ Id + Id ⨷ right #dense
+    end
 end
 function master_op(A, B)
     A_dim, B_dim = size(A)[1], size(B)[1]
@@ -45,20 +59,20 @@ function master_op(A, B)
         throw(ArgumentError("Dimensions of A and B mismatch"))
     end
     Id = I(A_dim)
-    left = Id - 0.5 * transpose(A - B)
-    right = Id - 0.5 * (A - B)
+    left = - 0.5 * (A + B)'
+    right = - 0.5 * (A + B)
     return left ⨷ sparse(Id) + sparse(Id) ⨷ right #sparse
     # return kron(left, Id) + kron(Id, right) #dense
 end
 
 function correlation_steady_state(h, A, B)
-    prob = LinearProblem(master_op(h, A, B), ComplexF64.(vec(A)))
+    prob = LinearProblem(master_op(h, A, B), -ComplexF64.(vec(A)))
     sol = solve(prob)
     return reshape(sol.u, size(A))
 end
-function correlation_steady_state(A, B, gpu::Bool=false)
+function correlation_steady_state(A, B, gpu::Bool)
     if !gpu
-        prob = LinearProblem(master_op(A, B), ComplexF64.(vec(A)))
+        prob = LinearProblem(master_op(A, B), -ComplexF64.(vec(A)))
         sol = solve(prob)
         return reshape(sol.u, size(A))
     else
