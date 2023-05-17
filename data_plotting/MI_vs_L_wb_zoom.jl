@@ -1,5 +1,7 @@
 include("../src/src.jl")
 
+using Plots
+
 df = DataFrame(CSV.File("data/MI_at_L_A_half_wb_zoom.csv"))
 
 p_array = unique(df.p)
