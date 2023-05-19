@@ -31,47 +31,83 @@ end
 
 
 
-function correlation_ness(A::AbstractMatrix{T}, B::AbstractMatrix{T}) where T
+
+function derivative_action(C, t, h, A, B)
+    return im * (transpose(h) * C - C * transpose(h)) - 0.5 * ((A + B) * C + C * (A + B)) + A
+end
+function derivative_action(C, t, A, B)
+    return - 0.5 * ((A + B) * C + C * (A + B)) + A
+end
+
+
+
+function master_op(h, A, B,use_sparse::Bool=true)
+    h_dim, A_dim, B_dim = size(h)[1], size(A)[1], size(B)[1]
+    if !(h_dim == A_dim == B_dim)
+        throw(ArgumentError("Dimensions of h, A and B mismatch"))
+    end
+    Id = I(h_dim)
+    left = - im * h - 0.5 * (A + B)'
+    right = im * h - 0.5 * (A + B)
+    if use_sparse
+        return left ⨷ sparse(Id) + sparse(Id) ⨷ right #sparse
+    else
+        return left ⨷ Id + Id ⨷ right #dense
+    end
+end
+function master_op(A, B,use_sparse::Bool=true)
     A_dim, B_dim = size(A)[1], size(B)[1]
     if !(A_dim == B_dim)
         throw(ArgumentError("Dimensions of A and B mismatch"))
     end
-    
-    L = size(A)[1]
-    theta = (A + B) / 2
-    lamb, vec_array = eigen(Hermitian(theta))1
-    A_tilda = (vec_array)' * (A*vec_array)
-    C_NESS = A_tilda ./ (lamb .+ reshape(lamb, (1, length(lamb))))
-    return vec_array * C_NESS * vec_array'
+    Id = I(A_dim)
+    left = - 0.5 * (A + B)'
+    right = - 0.5 * (A + B)
+    if use_sparse
+        return left ⨷ sparse(Id) + sparse(Id) ⨷ right #sparse
+    else
+        return left ⨷ Id + Id ⨷ right #dense
+    end
 end
 
 
 
-function correlation(A,B,C_0,t)
-    A_dim, B_dim, C_0_dim = size(A)[1], size(B)[1], size(C_0)[1]
-    if !(A_dim == B_dim == C_0_dim)
-        throw(ArgumentError("Dimensions of A, B and C_0 mismatch"))
+
+function correlation_steady_state(h, A, B, ness_guess::Bool)
+    if ness_guess
+        prob = LinearProblem(master_op(h, A, B), -ComplexF64.(vec(A));u0=-ComplexF64.(vec(A)))
+        sol = solve(prob)
+        return reshape(sol.u, size(A))
+    else
+        prob = LinearProblem(master_op(h, A, B), -ComplexF64.(vec(A)))
+        sol = solve(prob)
+        return reshape(sol.u, size(A))
     end
-    
-    L = size(A)[1]
-    theta = (A + B) / 2
-    lamb, vec_array = eigen(theta)
-    A_tilda = (vec_array)' * (A*vec_array)
-    C_0_tilda = (vec_array)' * (C_0*vec_array)
-    C = zeros(L,L)
-    for n=1:L
-        for m=1:L
-            temp_ness = A_tilda[n,m] ./ (lamb[n] + lamb[m])
-            temp_C_0 = C_0_tilda[n,m]
-            exponent = exp( -(lamb[n] + lamb[m])*t )
-            C += (vec_array[:, n]*vec_array[:, m]') * ( (temp_C_0-temp_ness)*exponent  +  temp_ness)
-        end
-    end
-    return C
 end
-
-
-
+function correlation_steady_state(h, A, B)
+    prob = LinearProblem(master_op(h, A, B), -ComplexF64.(vec(A)))
+    sol = solve(prob)
+    return reshape(sol.u, size(A))
+end
+function correlation_steady_state(A, B, gpu::Bool)
+    if !gpu
+        prob = LinearProblem(master_op(A, B), -ComplexF64.(vec(A)))
+        sol = solve(prob)
+        return reshape(sol.u, size(A))
+    else
+        A_f = lu(MtlArray(Float32.(master_op(A, B))))
+        sol = Matrix(A_f.U) \ (Matrix(A_f.L) \ vec(A))
+        return reshape(sol, size(A))
+    end
+end
+function correlation_steady_state(A, B) #if gpu not specified, use based on L
+    L = size(A)[1]
+    if L < 40
+        return correlation_steady_state(A, B, false)
+    else
+        return correlation_steady_state(A, B, true)
+    end
+end
 
 function sub_correlation(C_tot, subsys)
     L_sub = size(subsys)[1]
@@ -83,8 +119,6 @@ function sub_correlation(C_tot, subsys)
     end
     return C_sub
 end
-
-
 
 function vn_entropy(C)
     lambs = real(eigvals(C))
@@ -98,8 +132,6 @@ function vn_entropy(C)
     return entropy
     # return real( sum( -(1 .- lambs).*log2.(1 .- lambs) .- lambs.*log2.(lambs) ) ) THIS DOESNT WORK WHEN AN EIGVAL IS 0 OR 1 HENCE THE LOOP
 end
-
-
 
 function mutual_info(C, subsys_A, subsys_B)
     tot_sub_sys = vcat(subsys_A, subsys_B)
@@ -132,17 +164,11 @@ function mutual_info(C)
     return mutual_info(C, subsys_A)
 end
 
-
-
-
 function central_occ_bias(C)
     L = size(C)[1]
     xi = real(C[L ÷ 2, L ÷ 2]) #it is a real number already as C is hermitian. This makes temp a Float instead of ComplexFloat
     return log(1 / xi - 1)
 end
-
-
-
 
 function fss_cost(params, df_in::DataFrame; g_noise=false)
     p_c, nu = params[1], params[2]

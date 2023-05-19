@@ -4,14 +4,14 @@ using ProgressBars
 using Statistics
 using CSV 
 
-L_array = Vector(10:10:40)
+L_array = Vector(100:100:1000)
 p_array = Vector(0.75:0.025:1.25)
-runs_array = Vector(100:-10:50)
+runs_array = Vector(100:-10:10)
 data_array = zeros( length(L_array)*length(p_array), 5 ) # MI, MI_err, L, p, L_A
 
 counter = 1
 for (_,p) in ProgressBar(enumerate(p_array))
-    for (i, L) in ProgressBar(enumerate(L_array))
+    for (i, L) in enumerate(L_array)
         L_A = L÷3
         subsys_A = Vector(1:L_A)
         subsys_B = Vector(2*L_A:L)
@@ -19,7 +19,7 @@ for (_,p) in ProgressBar(enumerate(p_array))
         for j=1:runs_array[i]
             A = pwr_law_mat(L,p)
             B = pwr_law_mat(L,p)
-            C = correlation_steady_state(A, B,false)
+            C = correlation_ness(A, B)
             temp[j] = mutual_info(C,subsys_A,subsys_B)
         end
         data_array[counter,:] .= mean(temp), std(temp)/sqrt(runs_array[i]), L, p, L_A
