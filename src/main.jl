@@ -39,9 +39,9 @@ function correlation_ness(A::AbstractMatrix{T}, B::AbstractMatrix{T}) where T
     
     L = size(A)[1]
     theta = (A + B) / 2
-    lamb, vec_array = eigen(Hermitian(theta))1
+    lamb, vec_array = eigen(Hermitian(theta))
     A_tilda = (vec_array)' * (A*vec_array)
-    C_NESS = A_tilda ./ (lamb .+ reshape(lamb, (1, length(lamb))))
+    C_NESS = A_tilda ./ (lamb .+ lamb')
     return vec_array * C_NESS * vec_array'
 end
 
@@ -188,3 +188,19 @@ function fss_cost(params, df_in::DataFrame; g_noise=false)
 
     return O_val
 end
+
+
+
+function M_spectrum(A::AbstractMatrix{T}, B::AbstractMatrix{T}) where T
+    A_dim, B_dim = size(A)[1], size(B)[1]
+    if !(A_dim == B_dim)
+        throw(ArgumentError("Dimensions of A and B mismatch"))
+    end
+    
+    L = size(A)[1]
+    theta = (A + B) / 2
+    lambs = eigvals(Hermitian(theta))
+    M_spec = Vector(lamb .+ lamb')
+    return lamb
+end
+
