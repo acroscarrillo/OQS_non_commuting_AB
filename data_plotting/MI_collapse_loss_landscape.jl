@@ -5,7 +5,7 @@ df_in = DataFrame(CSV.File("data/MI_at_L_A_half_wb_zoom.csv")) #format MI|MI_err
 temp_F(params) = fss_cost(params, df_in; g_noise=false)
 
 p_c_array = Vector(range(0, stop=2, length=1000))
-nu_array  = Vector(range(0.5, stop=5, length=1000))
+nu_array  = Vector(range(0.5, stop=10, length=1000))
 
 loss = zeros((length(p_c_array),length(nu_array)))
 for (j,p_c) in ProgressBar(enumerate(p_c_array))
@@ -14,7 +14,7 @@ for (j,p_c) in ProgressBar(enumerate(p_c_array))
     end
 end
 
-heatmap(loss)
+heatmap(nu_array,p_c_array,loss,ylabel=L"p_c",xlabel=L"\nu",colorbar_title=L"\log(Cost)")
 
 savefig("figs/MI_collapse_loss_landscape/loss_landscape.pdf")
 savefig("figs/MI_collapse_loss_landscape/loss_landscape.png")

@@ -55,21 +55,15 @@ function correlation(A,B,C_0,t)
     
     L = size(A)[1]
     theta = (A + B) / 2
-    lamb, vec_array = eigen(theta)
+    lamb, vec_array = eigen(Hermitian(theta))
     A_tilda = (vec_array)' * (A*vec_array)
+    lamb_plus_lamb = lamb .+ lamb'
+    C_NESS = A_tilda ./ lamb_plus_lamb
     C_0_tilda = (vec_array)' * (C_0*vec_array)
-    C = zeros(L,L)
-    for n=1:L
-        for m=1:L
-            temp_ness = A_tilda[n,m] ./ (lamb[n] + lamb[m])
-            temp_C_0 = C_0_tilda[n,m]
-            exponent = exp( -(lamb[n] + lamb[m])*t )
-            C += (vec_array[:, n]*vec_array[:, m]') * ( (temp_C_0-temp_ness)*exponent  +  temp_ness)
-        end
-    end
-    return C
+    exp_t = exp.(-lamb_plus_lamb*t)
+    C = (C_0_tilda .- C_NESS) .* exp_t .+ C_NESS
+    return vec_array * C * vec_array'
 end
-
 
 
 
@@ -200,7 +194,7 @@ function M_spectrum(A::AbstractMatrix{T}, B::AbstractMatrix{T}) where T
     L = size(A)[1]
     theta = (A + B) / 2
     lambs = eigvals(Hermitian(theta))
-    M_spec = Vector(lamb .+ lamb')
-    return lamb
+    M_spec = vec(lambs .+ lambs')
+    return  sort(M_spec)
 end
 

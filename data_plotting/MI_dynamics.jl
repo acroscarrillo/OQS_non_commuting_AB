@@ -1,3 +1,4 @@
+using StatsPlots
 
 df_2_plot = DataFrame( CSV.File("data/MI_at_L_A_half_nb_dynamics.csv") ) 
 
