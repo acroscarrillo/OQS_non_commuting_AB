@@ -136,23 +136,22 @@ function central_occ_bias(C)
 end
 
 
+function perturb_df(df_in)
+    df = DataFrame()
+    df.MI = df_in.MI .+ sqrt.(df_in.MI_err) .* randn(size(df_in.MI))
+    df.MI_err, df.L, df.p, df.L_A = df_in.MI_err, df_in.L, df_in.p, df_in.L_A
+    return df
+end
 
 
-function fss_cost(params, df_in::DataFrame; g_noise=false)
+function fss_cost(params, df_in::DataFrame)
     p_c, nu = params[1], params[2]
 
     df = DataFrame()
-    if g_noise # add gaussian noise accordingly
-        df.y =
-            (df_in.MI .+ sqrt.(df_in.MI_err) .* randn(size(df_in.MI))) .*
-            (df_in.L .^ (1 / nu))
-        df.x = (df_in.p .- p_c) .* (df_in.L .^ (1 / nu))
-        df.d = df_in.MI_err .* sqrt.(df_in.L)
-    else # no noise
-        df.y = df_in.MI .* (df_in.L .^ (1 / nu))
-        df.x = (df_in.p .- p_c) .* (df_in.L .^ (1 / nu))
-        df.d = df_in.MI_err .* sqrt.(df_in.L)
-    end
+    df.y = df_in.MI .* (df_in.L .^ (1 / nu))
+    df.x = (df_in.p .- p_c) .* (df_in.L .^ (1 / nu))
+    df.d = df_in.MI_err .* sqrt.(df_in.L)
+
     sort!(df, :x)  # sort in ascending x_i
 
     O_val = 0
