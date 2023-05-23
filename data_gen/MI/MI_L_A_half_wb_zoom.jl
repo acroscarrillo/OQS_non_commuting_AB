@@ -4,9 +4,9 @@ using ProgressBars
 using Statistics
 using CSV 
 
-L_array = Vector(100:100:1000)
-p_array = Vector(0.75:0.025:1.25)
-runs_array = Vector(100:-10:10)
+L_array = Vector(400:400:2000)
+p_array = Vector(0.90:0.01:1.1)
+runs_array = Vector(100:-20:20)
 data_array = zeros( length(L_array)*length(p_array), 5 ) # MI, MI_err, L, p, L_A
 
 counter = 1
