@@ -176,11 +176,27 @@ function fss_cost(params, df_in::DataFrame)
         y_bar = y_m * frac_p + y_p * frac_m
         Delta_sqrd = d^2 + (d_m * frac_p)^2 + (d_p * frac_m)^2
 
-        O_val += (y - y_bar)^2#/Delta_sqrd
     end
 
     return O_val
 end
+
+
+
+function M_spectrum(A::AbstractMatrix{T}, B::AbstractMatrix{T}) where T
+    A_dim, B_dim = size(A)[1], size(B)[1]
+    if !(A_dim == B_dim)
+        throw(ArgumentError("Dimensions of A and B mismatch"))
+    end
+    
+    L = size(A)[1]
+    theta = (A + B) / 2
+    lambs = eigvals(Hermitian(theta))
+    M_spec = vec(lambs .+ lambs')
+    return  sort(M_spec)
+end
+
+
 
 
 

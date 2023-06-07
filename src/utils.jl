@@ -9,6 +9,16 @@ function rand_sym_pos(N::Int)
     return temp_sym/max(eigvals(temp_sym)...)
 end
 
+
+
+function perturb_df(df_in)
+    df = DataFrame()
+    df.MI = df_in.MI .+ df_in.MI_err .* randn(size(df_in.MI))
+    df.MI_err, df.L, df.p, df.L_A = df_in.MI_err, df_in.L, df_in.p, df_in.L_A
+    return df
+end
+
+
 # function sort_2_plot(df, x, y, y_err, fixed)
 #     data_2_plot = Vector(4) 
 #     for label in fixed
