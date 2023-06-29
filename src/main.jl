@@ -213,3 +213,25 @@ function M_spectrum(A::AbstractMatrix{T}, B::AbstractMatrix{T}) where T
     return  sort(M_spec)
 end
 
+
+function negativity(C, subsys_A, subsys_B)
+    L, L_A, L_B = size(C)[1], length(subsys_A), length(subsys_B)
+    if !(L_A + L_B == L)
+        throw(ArgumentError("L_A + L_B must be equal to L. Please provide an LxL Correlation matrix such that this condition is fulfiled. If you wish to work with subsystems, please provide an already traced out correlation matrix."))
+    end
+    G = 2*C - I(L)
+    L_trans =  blockdiag(-im*sparse(I(L_A)), sparse(I(L_B)))
+    R_trans = blockdiag( im*sparse(I(L_A)), -sparse(I(L_B)))
+    G_plus = L_trans * G * R_trans
+    G_min = L_trans' * G * R_trans'
+    G_T = 0.5*( I(L)-inv(I(L) + G_plus * G_min)*(G_plus+G_min) )
+    mu = eigvals(G_T)
+    lamb = eigvals(C)
+    negativity = 0
+    for i=1:L
+        mu_part = log( sqrt(mu[i]) + sqrt(1-mu[i]) )
+        lamb_part = 0.5*log(lamb[i]^2 + (1-lamb[i])^2)
+        negativity +=  mu_part + lamb_part
+    end
+    return real(negativity)
+end
