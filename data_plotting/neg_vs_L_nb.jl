@@ -16,7 +16,7 @@ end
 
 plot(transpose(float.(L)), transpose(float.(neg)), yerr = transpose(float.(neg_err)),
         labels="p = ".*string.(transpose(p_array)), xlabel="L", ylabel="neg",dpi=300,
-        xaxis=:log, yaxis=:log)
+        xaxis=:lin, yaxis=:lin)
 
 savefig("figs/MI_vs_L/neg_vs_L.pdf")
 savefig("figs/MI_vs_L/neg_vs_L.png")

@@ -2,6 +2,7 @@ using LinearAlgebra
 using Metal
 using DataFrames
 using Arpack
+using SparseArrays
 
 ⨷(a, b) = kron(a, b)
 
@@ -118,7 +119,7 @@ function mutual_info(C, subsys_A)
             counter += 1
         end
     end
-    return MI_NESS(C, subsys_A, Int.(subsys_B))
+    return mutual_info(C, subsys_A, Int.(subsys_B))
 end
 function mutual_info(C)
     L = size(C)[1]
@@ -222,8 +223,8 @@ function negativity(C, subsys_A, subsys_B)
     G = 2*C - I(L)
     L_trans =  blockdiag(-im*sparse(I(L_A)), sparse(I(L_B)))
     R_trans = blockdiag( im*sparse(I(L_A)), -sparse(I(L_B)))
-    G_plus = L_trans * G * R_trans
-    G_min = L_trans' * G * R_trans'
+    G_plus = Matrix(L_trans * G * R_trans)
+    G_min = Matrix(L_trans' * G * R_trans')
     G_T = 0.5*( I(L)-inv(I(L) + G_plus * G_min)*(G_plus+G_min) )
     mu = eigvals(G_T)
     lamb = eigvals(C)

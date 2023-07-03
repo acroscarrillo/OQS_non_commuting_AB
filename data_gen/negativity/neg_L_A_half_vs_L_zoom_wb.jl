@@ -4,9 +4,9 @@ using ProgressBars
 using Statistics
 using CSV 
 
-L_array = Vector(100:100:1000)
-p_array = Vector(0:0.2:2)
-runs_array = Vector(200:-20:20)
+L_array = Vector(400:400:2000)
+p_array = Vector(0.90:0.01:1.1)
+runs_array = Vector(1000:-200:200)
 data_array = zeros( length(L_array)*length(p_array), 5 ) # MI, MI_err, L, p, L_A
 
 counter = 1
@@ -28,4 +28,4 @@ for (_,p) in ProgressBar(enumerate(p_array))
 end
 
 df_wb = DataFrame(data_array, ["neg","neg_err","L","p","L_A"])
-CSV.write("data/neg_at_L_A_half.csv", df_wb)
+CSV.write("data/neg_at_L_A_half_zoom.csv", df_wb)
