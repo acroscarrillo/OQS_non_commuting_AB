@@ -18,5 +18,5 @@ plot(transpose(float.(L)), transpose(float.(neg)), yerr = transpose(float.(neg_e
         labels="p = ".*string.(transpose(p_array)), xlabel="L", ylabel="neg",dpi=300,
         xaxis=:lin, yaxis=:lin)
 
-savefig("figs/MI_vs_L/neg_vs_L.pdf")
-savefig("figs/MI_vs_L/neg_vs_L.png")
+savefig("figs/neg_vs_L/neg_vs_L_nb.pdf")
+savefig("figs/neg_vs_L/neg_vs_L_nb.png")

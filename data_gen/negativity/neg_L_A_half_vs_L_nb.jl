@@ -28,4 +28,4 @@ for (_,p) in ProgressBar(enumerate(p_array))
 end
 
 df_wb = DataFrame(data_array, ["neg","neg_err","L","p","L_A"])
-CSV.write("data/neg_at_L_A_half.csv", df_wb)
+CSV.write("data/neg_at_L_A_half_nb.csv", df_wb)

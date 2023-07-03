@@ -1,6 +1,6 @@
 include("../src/src.jl")
 
-df = DataFrame(CSV.File("data/neg_at_L_A_half_zoom.csv"))
+df = DataFrame(CSV.File("data/neg_at_L_A_half_zoom_wb.csv"))
 
 p_array = unique(df.p)
 L_array = unique(df.L)
@@ -15,5 +15,5 @@ plot(transpose(float.(p)), transpose(float.(neg)), yerr = transpose(float.(neg_e
         labels="L = ".*string.(transpose(L_array)), xlabel="p", ylabel="neg",dpi=300)
 
         
-savefig("figs/neg_vs_p/neg_vs_p_zoom_nb.pdf")
-savefig("figs/neg_vs_p/neg_vs_p_zoom_nb.png")
+savefig("figs/neg_vs_p/neg_vs_p_zoom_wb.pdf")
+savefig("figs/neg_vs_p/neg_vs_p_zoom_wb.png")
