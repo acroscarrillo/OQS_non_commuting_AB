@@ -137,7 +137,7 @@ function central_occ_bias(C)
 end
 
 
-function perturb_df(df_in)
+function perturb_df_MI(df_in)
     df = DataFrame()
     df.MI = df_in.MI .+ sqrt.(df_in.MI_err) .* randn(size(df_in.MI))
     df.MI_err, df.L, df.p, df.L_A = df_in.MI_err, df_in.L, df_in.p, df_in.L_A
@@ -145,7 +145,15 @@ function perturb_df(df_in)
 end
 
 
-function fss_cost(params, df_in::DataFrame)
+function perturb_df_neg(df_in)
+    df = DataFrame()
+    df.neg = df_in.neg .+ sqrt.(df_in.neg_err) .* randn(size(df_in.neg))
+    df.neg_err, df.L, df.p, df.L_A = df_in.neg_err, df_in.L, df_in.p, df_in.L_A
+    return df
+end
+
+
+function fss_cost_MI(params, df_in::DataFrame)
     p_c, nu = params[1], params[2]
 
     df = DataFrame()
@@ -177,10 +185,53 @@ function fss_cost(params, df_in::DataFrame)
         y_bar = y_m * frac_p + y_p * frac_m
         Delta_sqrd = d^2 + (d_m * frac_p)^2 + (d_p * frac_m)^2
 
+        O_val += (y-y_bar)^2#/Delta_sqrd
     end
 
     return O_val
 end
+
+
+
+
+function fss_cost_neg(params, df_in::DataFrame)
+    p_c, nu = params[1], params[2]
+
+    df = DataFrame()
+    df.y = df_in.neg .* (df_in.L .^ (1 / nu))
+    df.x = (df_in.p .- p_c) .* (df_in.L .^ (1 / nu))
+    df.d = df_in.neg_err .* sqrt.(df_in.L)
+
+    sort!(df, :x)  # sort in ascending x_i
+
+    O_val = 0
+    for i in 2:(nrow(df) - 1) # as each loop requires n.n.
+        y_m, y, y_p = df.y[i - 1], df.y[i], df.y[i + 1]
+        x_m, x, x_p = df.x[i - 1], df.x[i], df.x[i + 1]
+        d_m, d, d_p = df.d[i - 1], df.d[i], df.d[i + 1]
+
+        ###################
+        #CAREFUL WITH THIS#   this just handles the p=p_c situation which although 
+        # mathematically defined, it is numerically unstable so we put it by hand
+        ###################
+        temp = x_p - x_m
+        if temp == 0
+            frac_p, frac_m = 1 / 2, 1 / 2
+        else
+            frac_p = (x_p - x) / temp
+            frac_m = (x - x_m) / temp
+        end
+        ####################
+
+        y_bar = y_m * frac_p + y_p * frac_m
+        Delta_sqrd = d^2 + (d_m * frac_p)^2 + (d_p * frac_m)^2
+
+        O_val += (y-y_bar)^2#/Delta_sqrd
+    end
+
+    return O_val
+end
+
 
 
 

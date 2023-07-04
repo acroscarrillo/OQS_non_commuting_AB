@@ -14,6 +14,5 @@ end
 plot(transpose(float.(p)), transpose(float.(neg)), yerr = transpose(float.(neg_err)),
         labels="L = ".*string.(transpose(L_array)), xlabel="p", ylabel="neg",dpi=300)
 
-        
 savefig("figs/neg_vs_p/neg_vs_p_zoom_wb.pdf")
 savefig("figs/neg_vs_p/neg_vs_p_zoom_wb.png")
