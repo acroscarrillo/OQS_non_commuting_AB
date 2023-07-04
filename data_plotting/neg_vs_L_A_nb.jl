@@ -2,7 +2,7 @@ include("../src/src.jl")
 
 using Plots
 
-df = DataFrame(CSV.File("data/neg_vs_L_A_wb.csv"))
+df = DataFrame(CSV.File("data/neg_vs_L_A_nb.csv"))
 
 p_array = unique(df.p)
 L_A_array = unique(df.L_A)
@@ -18,5 +18,5 @@ plot(transpose(float.(L_A)), transpose(float.(neg)), yerr = transpose(float.(neg
         labels="p = ".*string.(transpose(p_array)), xlabel="L_A", ylabel="neg",dpi=300,
         xaxis=:lin, yaxis=:lin)
 
-savefig("figs/neg_vs_L_A/neg_vs_L_A_wb.pdf")
-savefig("figs/neg_vs_L_A/neg_vs_L_A_wb.png")
+savefig("figs/neg_vs_L_A/neg_vs_L_A_nb.pdf")
+savefig("figs/neg_vs_L_A/neg_vs_L_A_nb.png")
