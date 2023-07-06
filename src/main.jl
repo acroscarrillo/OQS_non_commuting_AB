@@ -6,8 +6,8 @@ using SparseArrays
 
 ⨷(a, b) = kron(a, b)
 
-function pwr_law_mat(L, p,real=true)
-    if real
+function pwr_law_mat(L, p,isreal=true)
+    if isreal
         temp = zeros(Float64, (L, L))
         for col in 1:L
             for row in 1:L
@@ -15,7 +15,7 @@ function pwr_law_mat(L, p,real=true)
             end
         end
         temp_sym = temp * (temp)'
-        max_lamb = eigs(temp_sym, nev = 1, ritzvec=false, which=:LR)[1][1]
+        max_lamb = eigs(temp_sym, nev = 1, ritzvec=false, which=:LR)[1][1]::Float64
         return temp_sym /max_lamb
     else
         temp = zeros(ComplexF64, (L, L))
@@ -25,7 +25,7 @@ function pwr_law_mat(L, p,real=true)
             end
         end
         temp_sym = temp * (temp)'
-        max_lamb = eigs(temp_sym, nev = 1, ritzvec=false, which=:LR)[1][1]
+        max_lamb = real(eigs(temp_sym, nev = 1, ritzvec=false, which=:LR)[1][1])
         return temp_sym /max_lamb
     end
 end
@@ -286,4 +286,16 @@ function negativity(C, subsys_A, subsys_B)
         negativity +=  mu_part + lamb_part
     end
     return real(negativity)
+end
+
+
+
+function imbalance(C)
+    L = size(C)[1]
+    N_odd, N_even = 0, 0
+    for i=1:L÷2
+        N_even += C[2*i,2*i]
+        N_odd += C[2*i-1,2*i-1]
+    end
+    return abs(N_odd - N_even)/(N_odd + N_even)
 end

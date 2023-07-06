@@ -1,3 +1,5 @@
+using Plots
+
 function rand_sym(N::Int)
     temp = randn(N,N)
     return temp*transpose(temp)
@@ -18,6 +20,12 @@ function perturb_df(df_in)
     return df
 end
 
+
+
+function Neel_corr(L)
+    ones_and_zeros = [0.5*(1+(-1)^n) for n=1:L]
+    return diagm(ones_and_zeros)
+end
 
 # function sort_2_plot(df, x, y, y_err, fixed)
 #     data_2_plot = Vector(4) 
