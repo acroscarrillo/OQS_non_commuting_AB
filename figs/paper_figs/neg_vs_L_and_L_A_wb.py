@@ -6,6 +6,8 @@ import pandas as pd
 import numpy as np
 import scipy.stats as stats
 from scipy.optimize import curve_fit
+import string
+
 
 # os.environ["PATH"] += os.pathsep + "C:/Users/Meli/AppData/Local/Programs/MiKTeX/miktex/bin/x64"
 
@@ -17,6 +19,7 @@ import pickle #to save python objects
 # import plotting stuff
 import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter, NullLocator, ScalarFormatter, LogFormatter
+import matplotlib.ticker
 
 from numpy import genfromtxt
 
@@ -72,10 +75,22 @@ plt.rcParams['figure.dpi'] = 300
 plt.rcParams['savefig.dpi'] = 600
 plt.rcParams["text.usetex"] = True
 pt = 0.0138889 
-fig = plt.figure(figsize = (246*pt,250*pt))
-gs = fig.add_gridspec(2,1)
-ax1 = fig.add_subplot(gs[0])
-ax2 = fig.add_subplot(gs[1])
+
+# fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(246*pt,110*pt),constrained_layout=True)
+
+fig = plt.figure(figsize = (246*pt,110*pt))
+gs = fig.add_gridspec(1, 2, wspace=0.6,left=0.15,right=.95,bottom=0.3,top=0.9)
+ax = gs.subplots()
+
+labels = ["a)","b)"]
+for n, a in enumerate(ax):
+    a.text(-0.2, 1, labels[n], transform=a.transAxes, 
+            size=10, weight='bold')
+
+# fig = plt.figure(figsize = (246*pt,110*pt))
+# gs = fig.add_gridspec(1,2)
+# ax[0] = fig.add_subplot(gs[0])
+# ax[1] = fig.add_subplot(gs[1])
 
 color_ls = ["C0","C1","C2","C3","C4","C5","C6","C7","C8","C9"]
 
@@ -87,18 +102,18 @@ for i,p in enumerate(p_array):
     L_array, neg_array, neg_err_array= df_temp["L"], df_temp["neg"], df_temp["neg_err"]
 
     g, y_intercept = fit_log_log( np.array(L_array), np.array(neg_array) )
-    ax1.plot(L_array, np.exp(y_intercept)*(L_array**g),lw=0.6,c=color_ls[i],ls="dashed")
-    ax1.errorbar(L_array,neg_array,yerr=neg_err_array,label=r'$\Delta$'+"="+str(np.round(g,2)),ms=0.8,marker="o", fmt=".",lw=0.6,color=color_ls[i])
+    ax[0].plot(L_array, np.exp(y_intercept)*(L_array**g),lw=0.6,c=color_ls[i],ls="dashed")
+    ax[0].errorbar(L_array,neg_array,yerr=neg_err_array,label=r'$\Delta$'+"="+str(np.round(g,2)),ms=0.8,marker="o", fmt=".",lw=0.6,color=color_ls[i])
 
-ax1.legend(fontsize=6,loc="upper left",framealpha=0.5)
-ax1.set_yscale("log")
-ax1.set_xscale("log")
-ax1.set_ylabel(r"$\mathcal{E}$",rotation=0)
-# ax1.set_yticks([10,0.001])
-# ax1.yaxis.set_label_coords(-0.2,0.6)
-# ax1.xaxis.set_label_coords(-0.2,-0.15)
-plt.text(-2, 3.3, '(b)')
-ax1.set_xlabel(r"$L$")
+ax[0].legend(fontsize=5,loc="upper left",framealpha=0.5)
+ax[0].set_yscale("log")
+ax[0].set_xscale("log")
+ax[0].set_ylabel(r"$\mathcal{E}$",rotation=0)
+# ax[0].set_yticks([10,0.001])
+# ax[0].yaxis.set_label_coords(-0.2,0.6)
+# ax[0].xaxis.set_label_coords(-0.2,-0.15)
+plt.text(-0.1, 0, '(a)')
+ax[0].set_xlabel(r"$L$")
 
 # MI vs L_A
 p_array = df_L_A["p"].unique()
@@ -107,38 +122,52 @@ for i,p in enumerate(p_array):
     print(df_temp)
     LA_array, neg_array, neg_err_array =  df_temp["L_A"], df_temp["neg"], df_temp["neg_err"]
 
-    g, y_intercept = fit_log_log( np.array(LA_array[1:len(LA_array)//4+1]),np.array(neg_array[1:len(LA_array)//4+1]) )
-    # ax2.plot(LA_array[1:len(LA_array)//2+1], np.exp(y_intercept)*(LA_array[1:len(LA_array)//2+1]**g),lw=0.6,c=color_ls[i],ls="dashed",label=r"$p=$"+str(round(p,2))+", "+ r'$\Delta$'+"="+str(np.round(g,2)))
-    # ax2.errorbar(LA_array[1:len(LA_array)//2+1],neg_array[1:len(LA_array)//2+1],fmt=".",yerr=neg_err_array[1:len(LA_array)//2+1],c=color_ls[i],alpha=0.4,ms=0.8,marker="o",lw=1)
-    ax2.errorbar(LA_array,neg_array,fmt=".",yerr=neg_err_array,c=color_ls[i],alpha=0.4,ms=0.8,marker="o",lw=1)
+    g, y_intercept = fit_log_log( np.array(LA_array[1:len(LA_array)]),np.array(neg_array[1:len(LA_array)]) )
+    # ax[1].plot(LA_array[1:len(LA_array)//2+1], np.exp(y_intercept)*(LA_array[1:len(LA_array)//2+1]**g),lw=0.6,c=color_ls[i],ls="dashed",label=r"$p=$"+str(round(p,2))+", "+ r'$\Delta$'+"="+str(np.round(g,2)))
+    ax[1].plot(LA_array, np.exp(y_intercept)*(LA_array**g),lw=0.6,c=color_ls[i],ls="dashed",label=r"$p=$"+str(round(p,2))+", "+ r'$\Delta$'+"="+str(np.round(g,2)))
+    # ax[1].errorbar(LA_array[1:len(LA_array)//2+1],neg_array[1:len(LA_array)//2+1],fmt=".",yerr=neg_err_array[1:len(LA_array)//2+1],c=color_ls[i],alpha=0.4,ms=0.8,marker="o",lw=1)
+    ax[1].errorbar(LA_array,neg_array,fmt=".",yerr=neg_err_array,c=color_ls[i],alpha=1,ms=0.8,marker="o",lw=1)
 
 
-ax2.legend(fontsize=4,loc="lower left",framealpha=0.5)
-ax2.set_xscale("log")
-ax2.set_yscale("log")
-ax2.set_ylabel(r"$\mathcal{E}$",rotation=0)
-ax2.set_xlabel(r"$L_A$")
-# ax2.xaxis.set_minor_formatter(LogFormatter(),minor_thresholds=None)
+ax[1].legend(fontsize=5,loc="upper left",framealpha=0.5)
+ax[1].set_xscale("log")
+ax[1].set_yscale("log")
+ax[1].set_ylabel(r"$\mathcal{E}$",rotation=0)
+ax[1].set_xlabel(r"$L_A$")
+# ax[1].xaxis.set_minor_formatter(LogFormatter(),minor_thresholds=None)
 # minor_thresholds=(2, 0.5)
-# ax2.yaxis.set_minor_formatter(LogFormatter(),minor_thresholds=None)
+# ax[1].yaxis.set_minor_formatter(LogFormatter(),minor_thresholds=None)
 
-# ax2.xaxis.set_major_formatter(LogFormatter(labelOnlyBase=False))
-# ax2.yaxis.set_major_formatter(LogFormatter(la3belOnlyBase=True))
-
-
-
-# ax2.yaxis.set_minor_formatter(NullFormatter())
-#ax2.xaxis.set_major_locator(NullLocator())
-#ax2.xaxis.set_minor_locator(NullLocator())
+# ax[1].xaxis.set_major_formatter(LogFormatter(labelOnlyBase=False))
+# ax[1].yaxis.set_major_formatter(LogFormatter(labelOnlyBase=True))
 
 
-# ax2.yaxis.set_ticks([10**(-6),20],[r"$10^{-6}$", r"$2\times 10^1$"])
-# ax2.xaxis.set_ticks([10.0,100, 300], [r"$10$", "", r"$3\times 10^2$"])
-# ax2.yaxis.set_label_coords(-0.15,0.6)
-# ax2.xaxis.set_label_coords(0.5,-0.15)
-plt.text(-0.8, 3.3, '(c)')
+locmaj = matplotlib.ticker.LogLocator(base=10,numticks=12) 
+ax[1].xaxis.set_major_locator(locmaj)
+locmin = matplotlib.ticker.LogLocator(base=10.0,subs=(0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9),numticks=12)
+ax[1].xaxis.set_minor_locator(locmin)
+ax[1].xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+
+locmaj = matplotlib.ticker.LogLocator(base=10,numticks=12) 
+ax[1].yaxis.set_major_locator(locmaj)
+locmin = matplotlib.ticker.LogLocator(base=10.0,subs=(0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9 ),numticks=12)
+ax[1].yaxis.set_minor_locator(locmin)
+ax[1].yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+
+# ax[1].yaxis.set_minor_formatter(NullFormatter())
+#ax[1].xaxis.set_major_locator(NullLocator())
+#ax[1].xaxis.set_minor_locator(NullLocator())
+
+
+# ax[1].yaxis.set_ticks([10**(-2),30],[r"$10^{-2}$", r"$3\times 10^1$"])
+# ax[1].xaxis.set_ticks([10.0,100, 300], [r"$10$", "", r"$3\times 10^2$"])
+
+# ax[1].yaxis.set_label_coords(-0.15,0.6)
+# ax[1].xaxis.set_label_coords(0.5,-0.15)
+# plt.text(-0.8, 3.3, '(b)')
+plt.text(0, 10, '(b)')
 
 # send it!
-plt.tight_layout()
+fig.tight_layout()
 plt.show()
-plt.savefig("paper_figs/images/MI_no_boundaries_fig.pdf")
+plt.savefig("figs/paper_figs/MI_no_boundaries_fig.pdf")

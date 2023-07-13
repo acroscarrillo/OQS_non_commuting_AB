@@ -6,8 +6,8 @@ using CSV
 
 
 L_array = Vector(400:400:2000)
-p_array = Vector(0:0.2:4)
-runs_array = Vector(500:-100:100)
+p_array = Vector(0:0.5:4)
+runs_array = Vector(1000:-200:200)
 data_array = zeros( length(L_array)*length(p_array), 4 )  # imb, imb_err, L, p
 
 counter = 1

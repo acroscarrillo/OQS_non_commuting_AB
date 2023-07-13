@@ -4,10 +4,10 @@ using ProgressBars
 using Statistics
 using CSV 
 
-L = 100
-L_A_array = Vector(13:3:L÷3)
+L = 1000
+L_A_array = Vector(10:10:L÷3)
 p_array = [0.0, 0.2, 0.6, 1.0, 1.6]
-runs = 1000
+runs = 100
 data_array = zeros( length(L_A_array)*length(p_array), 5 ) # MI, MI_err, L, p, L_A
 
 counter = 1

@@ -12,8 +12,8 @@ for val in p_array
     imb, imb_err, t = vcat(imb,temp_imb), vcat(imb_err,temp_imb_err), vcat(t,temp_t)
 end
 
-plot(transpose(float.(t)), transpose(float.(imb)), yerr = transpose(float.(imb_err)),
-        labels="p = ".*string.(transpose(p_array)), xlabel="t", ylabel="imb",dpi=300,xaxis=:lin, yaxis=:log)
+plot(transpose(float.(t[:,2:end])), transpose(float.(imb[:,2:end])), yerr = transpose(float.(imb_err[:,2:end])),
+        labels="p = ".*string.(transpose(p_array)), xlabel="t", ylabel="imb",dpi=300,xaxis=:log, yaxis=:lin)
 
 savefig("figs/imbalance/imb_vs_t.pdf")
 savefig("figs/imbalance/imb_vs_t.png")
