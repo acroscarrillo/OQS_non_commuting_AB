@@ -1,6 +1,7 @@
 using LinearAlgebra
 using Metal
 using DataFrames
+using Statistics
 using Arpack
 using SparseArrays
 
@@ -140,7 +141,7 @@ function bulk_bias_variance(C,bulk_size)
     L = size(C)[1]
     xi = real(diag(C))[L÷2-bulk_size÷2:L÷2+bulk_size÷2] #it is a real number already as C is hermitian. This makes temp a Float instead of ComplexFloat
     bias = log.(1 ./ xi .- 1)
-    return mean(bias), std(bias)
+    return std(bias), mean(bias)
 end
 
 

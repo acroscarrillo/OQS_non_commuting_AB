@@ -1,4 +1,5 @@
 using Plots
+using CSV
 
 function rand_sym(N::Int)
     temp = randn(N,N)

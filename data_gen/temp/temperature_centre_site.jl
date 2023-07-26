@@ -26,5 +26,5 @@ temps_4_hist = vcat(filter(row -> row.p == 4, df_temp).temp',filter(row -> row.p
 
 histogram(temps_4_hist', fillalpha=0.5, normalize=true, xlabel=L"\tilde{n}", ylabel=L"f(\tilde{n})",dpi=300,label = [L"p=4" L"p=0.4"])
 
-savefig("figs/temp/temp.pdf")
-savefig("figs/temp/temp.png")
+savefig("figs/temp/central_site_bias.pdf")
+savefig("figs/temp/central_site_bias.png")

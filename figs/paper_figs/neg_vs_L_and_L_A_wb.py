@@ -71,20 +71,22 @@ df_L_A = pd.read_csv("data/neg_vs_L_A_wb.csv")
 #############
 # plot data #
 #############
-plt.rcParams['figure.dpi'] = 300
+plt.rcParams['figure.dpi'] = 450
 plt.rcParams['savefig.dpi'] = 600
 plt.rcParams["text.usetex"] = True
 pt = 0.0138889 
 
 # fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(246*pt,110*pt),constrained_layout=True)
 
-fig = plt.figure(figsize = (246*pt,110*pt))
+fig = plt.figure(figsize = (246*pt,110*pt),layout="compressed")
 gs = fig.add_gridspec(1, 2, wspace=0.6,left=0.15,right=.95,bottom=0.3,top=0.9)
 ax = gs.subplots()
 
+# fig.subplots_adjust(right=1.01,left = 0)
+
 labels = ["a)","b)"]
 for n, a in enumerate(ax):
-    a.text(-0.2, 1, labels[n], transform=a.transAxes, 
+    a.text(-0.45, 0.85, labels[n], transform=a.transAxes, 
             size=10, weight='bold')
 
 # fig = plt.figure(figsize = (246*pt,110*pt))
@@ -166,8 +168,12 @@ ax[1].yaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
 # ax[1].xaxis.set_label_coords(0.5,-0.15)
 # plt.text(-0.8, 3.3, '(b)')
 plt.text(0, 10, '(b)')
+# fig.tight_layout()
+
+
+fig.subplots_adjust(wspace=100, hspace=1110)
 
 # send it!
-fig.tight_layout()
 plt.show()
-plt.savefig("figs/paper_figs/MI_no_boundaries_fig.pdf")
+plt.savefig("figs/paper_figs/negativity_comparison.pdf")
+plt.savefig("figs/paper_figs/negativity_comparison.png")
