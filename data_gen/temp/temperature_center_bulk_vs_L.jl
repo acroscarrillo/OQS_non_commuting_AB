@@ -40,7 +40,7 @@ CSV.write("data/bias_bulk_vs_L_STD.csv", df_std)
 temps_y = hcat(df_std[df_std.p .== 4.0,:].std_mean, df_std[df_std.p .== Float32(0.4),:].std_mean)
 temps_x = hcat(L_array,L_array)
 
-plot(temps_x, temps_y, ylabel=L"\overline{\sigma}", xlabel=L"L",dpi=300,label = [L"p=4" L"p=0.4"],xaxis=:log,yaxis=:log)
+plot(temps_x[10:end,:], temps_y[10:end,:], ylabel=L"\overline{\sigma}", xlabel=L"L",dpi=300,label = [L"p=4" L"p=0.4"],xaxis=:log,yaxis=:log)
 
 savefig("figs/temp/bias_bulk_vs_L.pdf")
 savefig("figs/temp/bias_bulk_vs_L.png")

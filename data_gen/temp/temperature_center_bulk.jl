@@ -2,7 +2,7 @@ include("../../src/src.jl")
 using ProgressBars
 
 L=1000
-n_samples = 1000
+n_samples = 10000
 p_array = [0.4,4]
 
 temp_array = zeros(n_samples*length(p_array), 4) #std, mean, L, p
@@ -18,7 +18,7 @@ for (j,p) in enumerate(p_array)
     end
 end
 
-df_temp = DataFrame(temp_array, ["mean","std","L","p"]) 
+df_temp = DataFrame(temp_array, ["std","mean","L","p"]) 
 CSV.write("data/bias_bulk.csv", df_temp)
 
 temps_4_hist = vcat(filter(row -> row.p == 4, df_temp).std',filter(row -> row.p == .4, df_temp).std')
