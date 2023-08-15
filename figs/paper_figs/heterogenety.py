@@ -61,9 +61,11 @@ ax.legend(loc="upper left",fontsize=7,framealpha=0.4)
 
 ax.set_ylabel(r"$f(\sigma)$",rotation=0,fontsize=11)
 ax.set_xlabel(r"$\sigma$",fontsize=12)
-ax.set_yticks([0.0,50])
+ax.set_ylim([-1,55])
+ax.set_yticks([0.0, 50.0])
 ax.set_xticks([0.0, 1.0, 2.0])
 ax.set_xticklabels(['0.0', '1.0', '2.0'])
+ax.set_yticklabels(['0.0', '50'])
 ax.yaxis.set_label_coords(-0.06,0.45)
 ax.xaxis.set_label_coords(0.525,-0.08)
 
@@ -89,7 +91,7 @@ ax.xaxis.set_label_coords(0.525,-0.08)
 
 
 # These are in unitless percentages of the figure size. (0,0 is bottom left)
-left, bottom, width, height = [0.49, 0.445, 0.41, 0.44]
+left, bottom, width, height = [0.45, 0.4525, 0.49, 0.46]
 ax_inset = fig.add_axes([left, bottom, width, height])
 
 std_vs_L = genfromtxt('data/bias_bulk_vs_L_STD.csv', delimiter=',')[1:,:]
@@ -143,5 +145,6 @@ ax_inset.xaxis.set_label_coords(0.6,-0.13)
 # ax_inset.set_xlim([47,1000])
 
 plt.tight_layout()
-# plt.savefig("paper_figs/images/temp_fig.png")
+plt.savefig("figs/paper_figs/heterogenety.pdf")
+plt.savefig("figs/paper_figs/heterogenety.png")
 plt.show()
